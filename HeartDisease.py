@@ -1,23 +1,9 @@
 import numpy as np
 import random
 from sklearn.linear_model import LogisticRegression
-from sklearn.preprocessing import StandardScaler
-import matplotlib.pyplot as plt
+from sklearn.model_selection import cross_val_score, KFold
+import sklearn.metrics as mt
 
-def featureNormalize(X):
-
-    [m,n] = X.shape
-
-    mean = X.mean(0)
-    std = np.amax(X, axis= 0) - np.amin(X, axis= 0)
-
-    X = (X-mean)/std
-
-    return [X,mean,std]
-
-def testNormalize(Xt,mean,sigma):
-    Xt = (Xt-mean)/sigma
-    return (Xt)
 
 def main():
 
@@ -56,14 +42,11 @@ def main():
     y_training=training_ds[:,n-1]
     y_validation=validation_ds[:,n-1]
     y_test=test_ds[:,n-1]
-
-    [training_ds,mean,sigma]=featureNormalize(training_ds) #Normalizar datos del conjunto de entrenamiento
-    validation_ds = testNormalize(validation_ds,mean,sigma)
-    test_ds = testNormalize(test_ds,mean,sigma)
-
-    logreg = LogisticRegression(C=1e5)
+    logreg = LogisticRegression(C=5)
     logreg.fit(X=training_ds,y=np.ravel(y_training))
     predict = logreg.predict(validation_ds)
-
+    print(cross_val_score(logreg, validation_ds, y=np.ravel(y_validation), cv = 5))
+    predict=logreg.predict(test_ds)
+    print(mt.confusion_matrix(predict,y_test))
 
 main()
