@@ -4,9 +4,19 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import cross_val_score, KFold
 import sklearn.metrics as mt
 
+def LogisticR():
+    logreg = LogisticRegression(C=5)
+    logreg.fit(X=training_ds,y=np.ravel(y_training))
+    print(cross_val_score(logreg, validation_ds, y=np.ravel(y_validation), cv = 5))
+    predict=logreg.predict(test_ds)
+    print(mt.confusion_matrix(predict,y_test))
+
+def SupportVM():
+    
 
 def main():
 
+    global y_training, training_ds,y_validation,y_test,test_ds,validation_ds
     f = open('Cleveland_DataSet.csv', 'r')
 
     np.set_printoptions(suppress=True)
@@ -42,11 +52,6 @@ def main():
     y_training=training_ds[:,n-1]
     y_validation=validation_ds[:,n-1]
     y_test=test_ds[:,n-1]
-    logreg = LogisticRegression(C=5)
-    logreg.fit(X=training_ds,y=np.ravel(y_training))
-    predict = logreg.predict(validation_ds)
-    print(cross_val_score(logreg, validation_ds, y=np.ravel(y_validation), cv = 5))
-    predict=logreg.predict(test_ds)
-    print(mt.confusion_matrix(predict,y_test))
+    logisticr()
 
 main()
