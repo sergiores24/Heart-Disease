@@ -1,7 +1,8 @@
 import numpy as np
 import random
 from sklearn.linear_model import LogisticRegression
-from sklearn.model_selection import cross_val_score, KFold
+from sklearn.model_selection import cross_val_score
+from sklearn.neural_network import MLPClassifier
 import sklearn.metrics as mt
 from sklearn import svm
 import os
@@ -16,38 +17,47 @@ def specificity (TN,N):
 def F1Score(TP,FP,FN):
     return ((2*TP)/((2*TP)+FP+FN))
 
+def Print(Cmatrix,name):
+    print("\n--------------------------Confusion ",name," -------------------------")
+    print("                    || Predicted Condition Positive || Predicted Condition Negative || \n"
+          "Condition Positive  ||             ", Cmatrix[0, 0], "             ||          ", Cmatrix[0, 1],
+          "                 || ",
+          "\nCondition Negative  ||             ", Cmatrix[1, 0], "              ||          ", Cmatrix[1, 1],
+          "                || ")
+    print("\nAccuracy: ",
+          accuracy(Cmatrix[0, 0], Cmatrix[1, 1], (Cmatrix[0, 0] + Cmatrix[0, 1]), (Cmatrix[1, 0] + Cmatrix[1, 1])))
+    print("Sensitivity: ", sensitivity(Cmatrix[0, 0], (Cmatrix[0, 0] + Cmatrix[0, 1])))
+    print("Specificity: ", specificity(Cmatrix[1, 1], (Cmatrix[1, 1] + Cmatrix[1, 0])))
+    print("F1Score: ", F1Score(Cmatrix[0, 0], Cmatrix[1, 0], Cmatrix[0, 1]))
+
 def LogisticR():
     logreg = LogisticRegression(C=5)
     logreg.fit(X=training_ds,y=np.ravel(y_training))
     score = cross_val_score(logreg, validation_ds, y=np.ravel(y_validation), cv = 5)
-    print("\nCV Accuracy LogisticRegression = ",np.mean(score)*100)
     predict=logreg.predict(test_ds)
     Cmatrix = mt.confusion_matrix(predict,y_test)
-    print ("\n--------------------------Confusion Matrix LogisticRegression -------------------------")
-    print ("                    || Predicted Condition Positive || Predicted Condition Negative || \n"
-           "Condition Positive  ||             ",Cmatrix[0,0],"             ||          ",Cmatrix[0,1], "                 || ",
-           "\nCondition Negative  ||             ",Cmatrix[1,0],"              ||          ",Cmatrix[1,1], "                || ")
-    print("\nAccuracy: ",accuracy(Cmatrix[0,0],Cmatrix[1,1],(Cmatrix[0,0]+Cmatrix[0,1]),(Cmatrix[1,0]+Cmatrix[1,1])))
-    print("Sensitivity: ",sensitivity(Cmatrix[0,0],(Cmatrix[0,0]+Cmatrix[0,1])))
-    print("Specificity: ",specificity(Cmatrix[1,1],(Cmatrix[1,1]+Cmatrix[1,0])))
-    print("F1Score: ", F1Score(Cmatrix[0,0],Cmatrix[1,0],Cmatrix[0,1]))
+    Print(Cmatrix,"Logistic Regression")
+    print("\nCV Accuracy LogisticRegression = ", np.mean(score) * 100)
 
 def SupportVM():
 
     clf = svm.SVC(C= 1,kernel='poly',degree=3)
     clf.fit(X = training_ds, y = np.ravel(y_training))
     score = cross_val_score(clf, validation_ds, y=np.ravel(y_validation), cv = 5)
-    print("\nCV Accuracy SVM = ",np.mean(score)*100)
     predict = clf.predict(test_ds)
     Cmatrix = mt.confusion_matrix(predict,y_test)
-    print ("\n--------------------------Confusion Matrix SVM--------------- -------------------------")
-    print ("                    || Predicted Condition Positive || Predicted Condition Negative || \n"
-           "Condition Positive  ||             ",Cmatrix[0,0],"             ||          ",Cmatrix[0,1], "                 || ",
-           "\nCondition Negative  ||             ",Cmatrix[1,0],"              ||          ",Cmatrix[1,1], "                || ")
-    print("\nAccuracy: ",accuracy(Cmatrix[0,0],Cmatrix[1,1],(Cmatrix[0,0]+Cmatrix[0,1]),(Cmatrix[1,0]+Cmatrix[1,1])))
-    print("Sensitivity: ",sensitivity(Cmatrix[0,0],(Cmatrix[0,0]+Cmatrix[0,1])))
-    print("Specificity: ",specificity(Cmatrix[1,1],(Cmatrix[1,1]+Cmatrix[1,0])))
-    print("F1Score: ", F1Score(Cmatrix[0,0],Cmatrix[1,0],Cmatrix[0,1]))
+    Print(Cmatrix,"Support Vector Machine")
+    print("\nCV Accuracy SVM = ", np.mean(score) * 100)
+
+def PerceptronML():
+    NeuralNet=MLPClassifier(solver="adam",hidden_layer_sizes=(25,),activation="logistic",max_iter=3000)
+    NeuralNet.fit(X=training_ds, y=np.ravel(y_training))
+    score = cross_val_score(NeuralNet, validation_ds, y=np.ravel(y_validation), cv=5)
+    predict = NeuralNet.predict(test_ds)
+    Cmatrix = mt.confusion_matrix(predict, y_test)
+    Print(Cmatrix,"Multi Layer Perceptron")
+    print("\nCV Accuracy MultiLayer Perceptron = ", np.mean(score) * 100)
+
 
 
 def main():
@@ -89,7 +99,7 @@ def main():
     y_validation=validation_ds[:,n-1]
     y_test=test_ds[:,n-1]
     LogisticR()
-    #wait = input()
     SupportVM()
+    PerceptronML()
 
 main()
