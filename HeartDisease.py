@@ -50,7 +50,7 @@ def SupportVM():
     print("\nCV Accuracy SVM = ", np.mean(score) * 100)
 
 def PerceptronML():
-    NeuralNet=MLPClassifier(solver="adam",hidden_layer_sizes=(250,),activation="logistic",max_iter=3000,alpha=0.00001)
+    NeuralNet=MLPClassifier(solver="adam",hidden_layer_sizes=(150,2),activation="logistic",max_iter=3000,alpha=0.00001)
     NeuralNet.fit(X=training_ds, y=np.ravel(y_training))
     score = cross_val_score(NeuralNet, validation_ds, y=np.ravel(y_validation), cv=5)
     predict = NeuralNet.predict(test_ds)
